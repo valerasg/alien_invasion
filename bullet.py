@@ -5,7 +5,7 @@ import random
 class Bullet(Sprite):
 	""" A class to manage bullets fired from the ship"""
 
-	def __init__(self, ai_settings, screen, ship, is_super=False):
+	def __init__(self, ai_settings, screen, ship, is_super=False, dx=0):
 		"""Create a bullet object at the ship's current position"""
 		super().__init__()
 		self.screen = screen
@@ -24,17 +24,21 @@ class Bullet(Sprite):
 
 		#Store the bullet's position as a decimal value.
 		self.y = float(self.rect.y)
+		self.x = float(self.rect.x)
 
 		# Bullet properties
 		self.speed_factor = ai_settings.bullet_speed_factor
+		self.dx = dx
 
 
 	def update(self):
 		"""Move the bullet up the screen."""
 		# Update the decimal position of the bullet.
 		self.y -= self.speed_factor
+		self.x += self.dx
 		# Update the rect position
 		self.rect.y = self.y
+		self.rect.x = self.x
 		
 
 	def draw_bullet(self):
@@ -51,12 +55,17 @@ class Enemy_Bullet(Sprite):
 
 		# Create a bullet rect at (0, 0) and then set correct position.
 		self.rect = pygame.Rect(0, 0, ai_settings.bullet_width, ai_settings.bullet_height)
-		enemies = []
-		for alien in aliens:
-			enemies.append(alien)
-			alien = random.choice(enemies)
-		self.rect.centerx = alien.rect.centerx
-		self.rect.bottom = alien.rect.bottom
+		
+		# Choose a random alien from the group.
+		enemy_list = list(aliens)
+		if enemy_list:
+			alien = random.choice(enemy_list)
+			self.rect.centerx = alien.rect.centerx
+			self.rect.bottom = alien.rect.bottom
+		else:
+			# Fallback if no aliens exist (should not happen with current logic)
+			self.rect.x = -100
+			self.rect.y = -100
 
 		# Store the bullet's position as a decimal value.
 		self.y = float(self.rect.y)

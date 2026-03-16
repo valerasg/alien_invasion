@@ -30,18 +30,29 @@ class Ship(Sprite):
 
 		# Shot counter
 		self.shots_fired = 0
+		
+		# Power-up timers (frames)
+		self.powerup_timers = {'shield': 0, 'multi_shot': 0, 'speed': 0}
 
 	def update(self):
 		"""Update the ship's position based on movement flags."""
+		current_speed = self.ai_settings.ship_speed_factor
+		if self.powerup_timers['speed'] > 0:
+			current_speed *= 1.5
+			
+		for p_type in self.powerup_timers:
+			if self.powerup_timers[p_type] > 0:
+				self.powerup_timers[p_type] -= 1
+
 		# Update the ship's center values not the rect.
 		if self.moving_right and self.rect.right < self.screen_rect.right - 10:
-			self.center_x += self.ai_settings.ship_speed_factor
+			self.center_x += current_speed
 		if self.moving_left and self.rect.left > 10:
-			self.center_x -= self.ai_settings.ship_speed_factor
+			self.center_x -= current_speed
 		if self.moving_up and self.rect.top > 0:
-			self.center_y -= self.ai_settings.ship_speed_factor
+			self.center_y -= current_speed
 		if self.moving_down and self.rect.bottom < self.screen_rect.bottom:
-			self.center_y += self.ai_settings.ship_speed_factor
+			self.center_y += current_speed
 
 		# Update rect object from self.center values.
 		self.rect.centerx = self.center_x
@@ -53,8 +64,12 @@ class Ship(Sprite):
 		self.center_y = self.screen_rect.bottom - 30
 		self.rect.centerx = self.center_x
 		self.rect.bottom = self.screen_rect.bottom - 5
+		# Reset powerups
+		self.powerup_timers = {'shield': 0, 'multi_shot': 0, 'speed': 0}
 
 	def blitme(self):
 		"""Draw the ship at its current location."""
 		self.screen.blit(self.image, self.rect)
+		if self.powerup_timers['shield'] > 0:
+			pygame.draw.circle(self.screen, (0, 100, 255), self.rect.center, self.rect.width // 2 + 10, 3)
 
